@@ -87,6 +87,30 @@ body.phase3 .redacted:hover{color:#b9a99b}
 #restart:hover{background:#38221f;color:#e0c5b8}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 
+
+.search-wrap{display:flex;align-items:center;gap:10px}
+.search-wrap input{border:0;outline:0;background:transparent;color:inherit;width:100%;font:inherit}
+.search-wrap input::placeholder{color:#a0a8b4}
+.interaction-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;color:#9aa3b1;font-size:11px}
+.interaction-bar button,.post-actions button,.clue-button{border:1px solid var(--line);background:transparent;color:inherit;border-radius:7px;padding:7px 10px;font:inherit;cursor:pointer;transition:.25s}
+.interaction-bar button:hover,.post-actions button:hover,.clue-button:hover{border-color:#9b7777;color:#b88b80}
+.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.post-actions button{font-size:11px}
+.post-actions button.liked{color:#c77b78;border-color:#9c5b57}
+.comment-drawer{display:none;margin-top:12px;padding:12px 14px;border-left:2px solid #8d6a60;background:#f7f4f1;color:#76675f;font:12px/1.9 monospace}
+.comment-drawer.open{display:block;animation:fadeIn .6s}
+body.phase2 .comment-drawer,body.phase3 .comment-drawer{background:#191817;color:#a58e82;border-color:#76534a}
+.clue-button{display:block;margin:18px auto 0;padding:12px 18px;letter-spacing:2px;font-size:11px}
+#clue-modal{display:none;position:fixed;inset:0;z-index:30;background:#050505eF;align-items:center;justify-content:center;padding:24px}
+#clue-modal.open{display:flex}
+.clue-card{max-width:460px;width:100%;border:1px solid #63463e;background:#100f0f;padding:28px;color:#b6a49a;text-align:center;box-shadow:0 0 60px #000}
+.clue-card h3{font:22px Georgia,serif;font-weight:400;letter-spacing:3px}
+.clue-card p{font:12px/2.2 monospace;color:#8e7b72}
+.clue-card button{margin-top:15px;border:1px solid #63463e;background:transparent;color:#b6a49a;padding:9px 18px;cursor:pointer}
+.no-results{display:none;text-align:center;padding:35px;color:#9a8177;font:12px/2 monospace}
+body.phase3 .interaction-bar button,body.phase3 .post-actions button{border-color:#463b36;color:#9f8980}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
 </style>
 </head>
 <body>
@@ -105,7 +129,8 @@ body.phase3 .redacted:hover{color:#b9a99b}
     <div><div class="eyebrow">CAMPUS COMMUNITY</div><h1>今天也来逛逛吧。</h1><p>分享校园日常，遇见有趣的灵魂。</p></div>
     <div class="date">星期三 · 11月25日</div>
   </section>
-  <div class="search">⌕　搜索帖子、话题或同学……</div>
+  <div class="search search-wrap">⌕ <input id="forum-search" type="search" placeholder="搜索帖子、话题或同学……" aria-label="搜索帖子"></div>
+  <div class="interaction-bar"><span id="result-count">今日帖子　·　点击按钮查看互动</span><button id="notice-toggle" type="button">查看系统公告</button></div>
   <div class="tabs"><strong>为你推荐</strong><span>最新发布</span><span>热门话题</span><span>树洞</span></div>
 
   <article class="post">
@@ -214,6 +239,14 @@ body.phase3 .redacted:hover{color:#b9a99b}
   </div>
 </section>
 <div id="cursor-note">在线访客：1　　访客身份：未登记</div>
+<div id="clue-modal" role="dialog" aria-modal="true" aria-labelledby="clue-title">
+  <div class="clue-card">
+    <div class="final-kicker">UNREGISTERED MESSAGE</div>
+    <h3 id="clue-title">未读留言</h3>
+    <p id="clue-text">你找到了不该出现的内容。</p>
+    <button id="close-clue" type="button">关闭窗口</button>
+  </div>
+</div>
 <script>
 const oddity=document.getElementById('oddity');
 const deeper=document.getElementById('deeper');
@@ -264,6 +297,79 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden && stage>=1){document.title='别把我留在这里';}
   else if(!document.hidden && stage>=1){document.title='你回来了。';notify('页面没有关闭。我们一直在等。');}
 });
+
+// --- 互动功能：点赞、评论、搜索、系统公告与隐藏线索 ---
+const modal=document.getElementById('clue-modal');
+const clueText=document.getElementById('clue-text');
+function openClue(message,title='未读留言'){
+  document.getElementById('clue-title').textContent=title;
+  clueText.textContent=message;
+  modal.classList.add('open');
+}
+document.getElementById('close-clue').addEventListener('click',()=>modal.classList.remove('open'));
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
+
+const commentLines=[
+  '回复：我也看见了。可是帖子发出后，楼层变成了 0。',
+  '回复：管理员说这栋楼没有这一层。那我现在站在哪里？',
+  '回复：别刷新。刷新之后，发帖的人会变成你。',
+  '回复：这条评论原本不是写给你的。'
+];
+document.querySelectorAll('.post').forEach((post,index)=>{
+  const actions=document.createElement('div');
+  actions.className='post-actions';
+  actions.innerHTML='<button type="button" class="like-btn">♡ <span>赞</span> <b>0</b></button><button type="button" class="comment-btn">◯ 查看评论</button>';
+  const drawer=document.createElement('div');
+  drawer.className='comment-drawer';
+  drawer.textContent=commentLines[index%commentLines.length];
+  post.append(actions,drawer);
+  const like=actions.querySelector('.like-btn');
+  like.addEventListener('click',()=>{
+    const active=like.classList.toggle('liked');
+    like.querySelector('b').textContent=active?'1':'0';
+    like.querySelector('span').textContent=active?'已赞':'赞';
+    if(document.body.classList.contains('phase3') && active){
+      notify('系统：谢谢你确认自己的存在。');
+    }
+  });
+  actions.querySelector('.comment-btn').addEventListener('click',()=>{
+    drawer.classList.toggle('open');
+    actions.querySelector('.comment-btn').textContent=drawer.classList.contains('open')?'收起评论':'◯ 查看评论';
+    if(drawer.classList.contains('open') && index>=2){
+      setTimeout(()=>{ if(drawer.classList.contains('open')) drawer.textContent='回复：你终于点开了。我们等这个动作很久了。'; },900);
+    }
+  });
+});
+
+// Search filters posts as the user types.
+const searchInput=document.getElementById('forum-search');
+const resultCount=document.getElementById('result-count');
+searchInput.addEventListener('input',()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  let shown=0;
+  document.querySelectorAll('.post').forEach(post=>{
+    const match=post.innerText.toLowerCase().includes(q);
+    post.style.display=match?'':'none';
+    if(match)shown++;
+  });
+  resultCount.textContent=q?`检索结果：${shown} 条`:'今日帖子　·　点击按钮查看互动';
+  if(q && shown===0) notify('没有找到相关帖子……但有一条新记录正在生成。');
+});
+
+// System notice is clickable; later stages reveal a different message.
+document.getElementById('notice-toggle').addEventListener('click',()=>{
+  if(stage>=2) openClue('公告内容已被覆盖。最新公告：请不要相信页面右下角的在线人数。','系统公告 / 已篡改');
+  else openClue('欢迎来到课后广场。请文明交流，勿发布个人信息。','系统公告');
+});
+
+// A hidden clickable clue appears only after the page has turned strange.
+const clue=document.createElement('button');
+clue.type='button';clue.className='clue-button';clue.textContent='查看本页的缓存记录';
+clue.addEventListener('click',()=>{
+  openClue(stage>=2?'缓存记录：访问者并非从首页进入。访问者一直没有离开。':'缓存记录：页面加载正常。最后访问时间：未知。','CACHE / 记录');
+});
+document.querySelector('.wrap').appendChild(clue);
+
 </script>
 </body>
 </html>
