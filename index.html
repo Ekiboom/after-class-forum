@@ -51,10 +51,50 @@ body.phase3 #cursor-note{opacity:.65}
 #grain{pointer-events:none;position:fixed;inset:0;z-index:8;opacity:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");mix-blend-mode:screen}
 body.phase3 #grain{opacity:.12}
 @media(max-width:600px){.nav{gap:10px;font-size:11px}.welcome h1{font-size:25px}.date{display:none}.post{padding:17px}.wrap{padding-top:30px}}
+
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:7;opacity:0;transition:opacity 4s;
+ background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,.28) 100%)}
+#scanlines{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;
+ background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0px,rgba(255,255,255,.025) 1px,transparent 2px,transparent 4px)}
+#hall-shadow{position:fixed;z-index:2;pointer-events:none;right:7vw;top:18vh;width:110px;height:60vh;opacity:0;transition:opacity 5s}
+#hall-shadow:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,0,0,.22),transparent);filter:blur(14px)}
+#hall-shadow span{position:absolute;left:30px;top:18%;width:48px;height:48px;border-radius:48% 48% 42% 42%;background:#050505;filter:blur(2px);box-shadow:0 0 28px #000}
+#hall-shadow span:after{content:"";position:absolute;left:-15px;top:38px;width:78px;height:230px;background:#050505;border-radius:45% 45% 8% 8%;clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
+#system-toast{position:fixed;z-index:12;top:78px;right:18px;max-width:min(340px,calc(100vw - 36px));padding:13px 16px;
+ background:#171313;border:1px solid #5a3933;color:#c49b8e;font:11px/1.8 monospace;letter-spacing:1px;
+ opacity:0;transform:translateY(-12px);transition:all .6s;pointer-events:none}
+#system-toast.show{opacity:1;transform:translateY(0)}
+body.phase2 #vignette{opacity:.55}
+body.phase3 #vignette{opacity:1}
+body.phase3 #scanlines{opacity:.18}
+body.phase3 #hall-shadow{opacity:.8}
+body.phase3 .top{filter:contrast(1.15)}
+body.phase3 .post{animation:uneasy 8s infinite}
+body.phase3 .post:nth-of-type(2n){animation-delay:1.7s}
+@keyframes uneasy{0%,96%,100%{transform:translateX(0)}97%{transform:translateX(1px)}98%{transform:translateX(-1px)}}
+body.phase3 .avatar{position:relative}
+body.phase3 .avatar:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 38%,#050505 0 2px,transparent 3px),radial-gradient(circle at 50% 62%,#050505 0 8px,transparent 9px)}
+body.phase3 .welcome{filter:blur(.15px)}
+.extra-post{opacity:0;transform:translateY(18px);transition:opacity 2s,transform 2s}
+.extra-post.revealed{opacity:1;transform:none}
+.redacted{background:#151313;color:#151313;padding:0 4px;user-select:none}
+.redacted:hover{color:#c2aaa0}
+body.phase3 .redacted{background:#050505;color:#050505}
+body.phase3 .redacted:hover{color:#b9a99b}
+#finale{background:radial-gradient(ellipse at center,#17100f 0%,#050505 65%);z-index:1}
+.final-title{animation:titlePulse 5s infinite}
+@keyframes titlePulse{0%,100%{text-shadow:0 0 0 transparent;opacity:1}50%{text-shadow:0 0 22px #8c4035;opacity:.82}}
+#restart:hover{background:#38221f;color:#e0c5b8}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
 </style>
 </head>
 <body>
 <div id="grain"></div>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="hall-shadow" aria-hidden="true"><span></span></div>
+<div id="system-toast" aria-live="polite"></div>
 <header class="top">
   <a class="logo" href="#"><b>课后</b>广场</a>
   <nav class="nav"><span>首页</span><span>校园圈</span><span>失物招领</span><span>自习搭子</span></nav>
@@ -127,6 +167,35 @@ body.phase3 #grain{opacity:.12}
       <h2>不要往下翻了。</h2>
       <p>我们试过关掉页面。<br>但它不是在屏幕里面。<br>它只是借这里看着你。</p>
     </article>
+    <article class="post extra-post">
+      <div class="meta">档案室　·　内部留言　·　2009-09-03</div>
+      <h2>失物招领：一张学生证</h2>
+      <p>姓名栏被水泡坏了。照片上的人很眼熟。<br>奇怪的是，照片背面写着：<span class="redacted">你现在正在读这行字</span>。</p>
+      <div class="stats">♡ 0　　◯ 关闭评论　　记录编号：A-017</div>
+    </article>
+    <article class="post extra-post">
+      <div class="meta">夜间巡逻　·　保卫处　·　02:41</div>
+      <h2>今晚请不要使用东侧楼梯。</h2>
+      <p>监控显示，凌晨两点以后，楼梯间会多出一层。<br>上去的人都说自己只走了十几秒。<br>监控里的时钟却停了整整六个小时。</p>
+      <div class="stats">♡ 2　　◯ 4 条评论　　评论内容已归档</div>
+    </article>
+    <article class="post extra-post">
+      <div class="meta">用户 0000　·　位置未知　·　刚刚</div>
+      <h2 class="glitch">我找到你之前发的帖子了。</h2>
+      <p>你问过这里有没有人。<br>你问过为什么所有人都不回你。<br>其实他们回了，只是你每次刷新，都会忘记。</p>
+      <div class="stats">♡ 1　　◯ 1 条评论</div>
+    </article>
+    <article class="post extra-post">
+      <div class="meta">系统　·　管理员权限　·　时间：23:17:00</div>
+      <h2>用户列表更新失败</h2>
+      <p>在线人数：1<br>已登录人数：0<br>等待离开人数：<span class="glitch">1</span><br><br>请管理员确认：为什么访客头像一直在增加？</p>
+    </article>
+    <article class="post extra-post">
+      <div class="meta">匿名用户　·　这条帖子来自当前设备</div>
+      <h2>如果你看见走廊尽头亮着灯</h2>
+      <p>不要过去。<br>那不是出口。<br>那是有人把你刚刚浏览过的页面，投影在墙上。<br>而投影里的人，已经比你早一步停下来了。</p>
+      <div class="stats">♡ 0　　◯ 无法加载评论</div>
+    </article>
   </div>
 </main>
 
@@ -149,20 +218,52 @@ body.phase3 #grain{opacity:.12}
 const oddity=document.getElementById('oddity');
 const deeper=document.getElementById('deeper');
 const finale=document.getElementById('finale');
-let stage=0;
+const toast=document.getElementById('system-toast');
+const extraPosts=[...document.querySelectorAll('.extra-post')];
+let lastToast=-1, stage=0;
+const messages=[
+  '系统提示：检测到一位未登记的访客。',
+  '缓存警告：有一条帖子来自明天。',
+  '管理员：请不要点击头像。',
+  '连接中断。……连接已恢复。',
+  '系统提示：你似乎不是第一次来到这里。',
+  '夜间模式已开启。请留在原地。'
+];
+function notify(text){
+  toast.textContent=text;
+  toast.classList.add('show');
+  clearTimeout(notify.timer);
+  notify.timer=setTimeout(()=>toast.classList.remove('show'),3300);
+}
 function onScroll(){
   const y=window.scrollY, max=document.documentElement.scrollHeight-innerHeight;
   const p=max?y/max:0;
-  if(p>.22){oddity.classList.add('visible');document.body.classList.add('phase2');stage=Math.max(stage,1)}
-  if(p>.52){deeper.style.opacity='1';document.body.classList.add('phase3');stage=Math.max(stage,2);
+  if(p>.12){oddity.classList.add('visible');document.body.classList.add('phase2');stage=Math.max(stage,1)}
+  if(p>.30){
+    deeper.style.opacity='1';
+    document.body.classList.add('phase3');
     document.querySelector('.welcome h1').textContent='你不该记得这里。';
     document.querySelector('.welcome p').textContent='页面仍在加载。请不要离开。';
+    stage=Math.max(stage,2);
   }
-  if(p>.78){finale.classList.add('visible');stage=3}
+  extraPosts.forEach((post,i)=>{
+    const r=post.getBoundingClientRect();
+    if(r.top<window.innerHeight*.88) post.classList.add('revealed');
+  });
+  const idx=Math.min(messages.length-1,Math.floor(p*messages.length*1.18));
+  if(p>.36 && idx!==lastToast){lastToast=idx;notify(messages[idx]);}
+  if(p>.72){finale.classList.add('visible');stage=3;}
 }
 deeper.style.opacity='0';deeper.style.transition='opacity 3s';
 window.addEventListener('scroll',onScroll,{passive:true});
-window.addEventListener('load',()=>{setTimeout(()=>{if(scrollY===0){document.title='课后广场 · 校园论坛'}},1000)});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{if(scrollY===0)document.title='课后广场 · 校园论坛';},1000);
+  setTimeout(()=>{if(scrollY<100)notify('欢迎回来。同学，你上次没有走完。');},8500);
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden && stage>=1){document.title='别把我留在这里';}
+  else if(!document.hidden && stage>=1){document.title='你回来了。';notify('页面没有关闭。我们一直在等。');}
+});
 </script>
 </body>
 </html>
